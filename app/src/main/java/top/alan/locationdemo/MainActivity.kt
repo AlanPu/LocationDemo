@@ -62,6 +62,7 @@ fun LocationApp() {
     var locationText by remember { mutableStateOf("Location data not available") }
     var addressInfo by remember { mutableStateOf("") }
     var satelliteCount by remember { mutableIntStateOf(0) }
+    var satelliteFound by remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
 
     val locationListener = remember {
@@ -85,8 +86,16 @@ fun LocationApp() {
                 } else {
                     addressInfo = "No address found for the location."
                 }
-                val source = if (location.provider == LocationManager.GPS_PROVIDER) "GPS" else "Network"
+
+                val source =
+                    when (location.provider) {
+                        LocationManager.NETWORK_PROVIDER -> "Network"
+                        LocationManager.GPS_PROVIDER -> "GPS"
+                        else -> "N/A"
+                    }
+
                 locationText = "Source: $source\n" +
+                    "Satellite Found: $satelliteFound\n" +
                     "Connected Satellites: $satelliteCount\n" +
                         "Latitude: ${location.latitude}\n" +
                         "Longitude: ${location.longitude}\n" +
@@ -105,6 +114,7 @@ fun LocationApp() {
     DisposableEffect(key1 = locationManager) {
         val gnssCallback = object : GnssStatus.Callback() {
             override fun onSatelliteStatusChanged(status: GnssStatus) {
+                satelliteFound = status.satelliteCount
                 satelliteCount = (0 until status.satelliteCount).count { status.usedInFix(it) }
             }
         }
