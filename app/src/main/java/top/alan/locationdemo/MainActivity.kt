@@ -31,11 +31,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.launch
 import top.alan.locationdemo.ui.theme.LocationDemoTheme
+import java.time.Duration
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,14 +63,36 @@ fun LocationApp() {
     val geoCoder = Geocoder(context)
     var locationText by remember { mutableStateOf("Location data not available") }
     var addressInfo by remember { mutableStateOf("") }
+    var timeLabel by remember { mutableStateOf("") }
     var satelliteCount by remember { mutableIntStateOf(0) }
     var satelliteFound by remember { mutableIntStateOf(0) }
+    var isFirstLocationUpdate by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
+    val launchTime = LocalTime.now()
 
     val locationListener = remember {
         object : LocationListener {
             override fun onLocationChanged(location: Location) {
-                locationText = ""
+                if (isFirstLocationUpdate) {
+                    if (ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED ||
+                        ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            5000,
+                            10f,
+                            this
+                        )
+                        isFirstLocationUpdate = false
+                        return
+                    }
+                }
                 addressInfo = ""
                 val addresses = geoCoder.getFromLocation(location.latitude, location.longitude, 5)
                 if (addresses!!.isNotEmpty()) {
@@ -80,8 +104,7 @@ fun LocationApp() {
                                 "City: ${address.locality}\n" +
                                 "State: ${address.adminArea}\n" +
                                 "Country: ${address.countryName}\n" +
-                                "Postal Code: ${address.postalCode}\n" +
-                                "------------------------------------\n"
+                                "Postal Code: ${address.postalCode}\n\n"
                     }
                 } else {
                     addressInfo = "No address found for the location."
@@ -94,12 +117,15 @@ fun LocationApp() {
                         else -> "N/A"
                     }
 
-                locationText = "Source: $source\n" +
-                    "Satellite Found: $satelliteFound\n" +
-                    "Connected Satellites: $satelliteCount\n" +
+                timeLabel = getTime(launchTime)
+                locationText = "Time: $timeLabel\n" +
+                        "Source: $source\n" +
+                        "Satellite Found: $satelliteFound\n" +
+                        "Connected Satellites: $satelliteCount\n" +
                         "Latitude: ${location.latitude}\n" +
                         "Longitude: ${location.longitude}\n" +
-                        "Accuracy: ${location.accuracy}m\n\n$addressInfo"
+                        "Accuracy: ${location.accuracy}m\n\n$addressInfo\n" +
+                        "====================================\n\n" + locationText
             }
 
             @Deprecated("Deprecated in Java")
@@ -134,9 +160,11 @@ fun LocationApp() {
 
     val coroutineScope = rememberCoroutineScope()
 
-    Column(modifier = Modifier
-        .padding(16.dp)
-        .verticalScroll(scrollState)) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(scrollState)
+    ) {
         Text(text = locationText, modifier = Modifier.padding(bottom = 8.dp))
         Button(onClick = {
             coroutineScope.launch {
@@ -160,14 +188,8 @@ fun LocationApp() {
                 } else {
                     locationManager.requestLocationUpdates(
                         LocationManager.GPS_PROVIDER,
-                        5000,
-                        10f,
-                        locationListener
-                    )
-                    locationManager.requestLocationUpdates(
-                        LocationManager.NETWORK_PROVIDER,
-                        5000,
-                        10f,
+                        3000,
+                        1f,
                         locationListener
                     )
                 }
@@ -176,4 +198,15 @@ fun LocationApp() {
             Text("Start Location Updates")
         }
     }
+}
+
+private fun getTime(launchTime: LocalTime): String {
+    val currentTime = LocalTime.now()
+    val duration = Duration.between(launchTime, currentTime)
+    val hoursDifference = duration.toHours()
+    val minutesDifference = duration.toMinutes() % 60
+    val secondsDifference = duration.seconds % 60
+    val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+    val timeDifference = String.format("%02d:%02d:%02d", hoursDifference, minutesDifference, secondsDifference)
+    return "${currentTime.format(formatter)} (Spent: $timeDifference)"
 }
