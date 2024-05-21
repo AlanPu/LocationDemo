@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.location.LocationListener
 import android.location.LocationManager
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import java.util.LinkedList
@@ -16,9 +17,13 @@ class LocationViewModel : ViewModel() {
     private val _networkEnabled = mutableStateOf(false)
     private val _locations = LinkedList<String>()
     private val _locationText = mutableStateOf("")
+    private val _satelliteFound = mutableIntStateOf(0)
+    private val _satelliteCount = mutableIntStateOf(0)
     val gpsEnabled: State<Boolean> = _gpsEnabled
     val networkEnabled: State<Boolean> = _networkEnabled
     val locationText: State<String> = _locationText
+    val satelliteFound: State<Int> = _satelliteFound
+    val satelliteCount: State<Int> = _satelliteCount
 
     @SuppressLint("MissingPermission")
     fun onGpsStateChanged(checked: Boolean) {
@@ -52,8 +57,13 @@ class LocationViewModel : ViewModel() {
         }
     }
 
+    fun onSatelliteStateChanged(satelliteFound: Int, satelliteCount: Int) {
+        _satelliteFound.intValue = satelliteFound
+        _satelliteCount.intValue = satelliteCount
+    }
+
     fun onLocationChanged(locationText: String) {
         _locations.addFirst(locationText)
-        _locationText.value = _locations.joinToString("\n\n")
+        _locationText.value = _locations.joinToString("\n")
     }
 }

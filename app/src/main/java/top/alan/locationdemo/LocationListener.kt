@@ -1,28 +1,36 @@
 package top.alan.locationdemo
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.location.GnssStatus
 import android.location.LocationListener
 import android.location.LocationManager
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
 import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun locationListener(onLocationChanged: ((String) -> Unit)): LocationListener {
+fun locationListener(
+    satelliteCount: State<Int>,
+    satelliteFound: State<Int>,
+    onLocationChanged: ((String) -> Unit)
+): LocationListener {
     val context = LocalContext.current
     val geoCoder = Geocoder(context)
     var addressInfo by remember { mutableStateOf("") }
     var timeLabel by remember { mutableStateOf("") }
     var locationText by remember { mutableStateOf("") }
-    var satelliteCount by remember { mutableIntStateOf(0) }
-    var satelliteFound by remember { mutableIntStateOf(0) }
     val launchTime = LocalTime.now()
 
     return remember {
@@ -53,8 +61,8 @@ fun locationListener(onLocationChanged: ((String) -> Unit)): LocationListener {
             timeLabel = getTime(launchTime)
             locationText = "Time: $timeLabel\n" +
                     "Source: $source\n" +
-                    "Satellite Found: $satelliteFound\n" +
-                    "Connected Satellites: $satelliteCount\n" +
+                    "Satellite Found: ${satelliteFound.value}\n" +
+                    "Connected Satellites: ${satelliteCount.value}\n" +
                     "Latitude: ${location.latitude}\n" +
                     "Longitude: ${location.longitude}\n" +
                     "Accuracy: ${location.accuracy}m\n\n$addressInfo\n" +

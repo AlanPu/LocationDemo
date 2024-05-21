@@ -16,11 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -38,8 +34,6 @@ fun LocationApp(
 ) {
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
-    var satelliteCount by remember { mutableIntStateOf(0) }
-    var satelliteFound by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
 
     Column {
@@ -82,28 +76,6 @@ fun LocationApp(
                 .verticalScroll(scrollState)
         ) {
             Text(text = locationText.value, modifier = Modifier.padding(bottom = 8.dp))
-        }
-    }
-
-    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    DisposableEffect(key1 = locationManager) {
-        val gnssCallback = object : GnssStatus.Callback() {
-            override fun onSatelliteStatusChanged(status: GnssStatus) {
-                satelliteFound = status.satelliteCount
-                satelliteCount = (0 until status.satelliteCount).count { status.usedInFix(it) }
-            }
-        }
-
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            locationManager.registerGnssStatusCallback(gnssCallback)
-        }
-
-        onDispose {
-            locationManager.unregisterGnssStatusCallback(gnssCallback)
         }
     }
 }
