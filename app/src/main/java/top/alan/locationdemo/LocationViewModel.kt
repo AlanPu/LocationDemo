@@ -8,6 +8,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import java.io.File
 import java.util.LinkedList
 
 class LocationViewModel : ViewModel() {
@@ -29,6 +30,8 @@ class LocationViewModel : ViewModel() {
     val satelliteCount: State<Int> = _satelliteCount
     val permissionGranted: State<Boolean> = _permissionGranted
 
+    fun shareData() {
+    }
     fun grantPermission(granted: Boolean) {
         _permissionGranted.value = granted
     }

@@ -5,12 +5,17 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.GnssStatus
 import android.location.LocationManager
+import android.os.Build
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +24,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -37,7 +43,12 @@ fun LocationApp(
     val context = LocalContext.current
 
     Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp)
+        ) {
             Checkbox(checked = gpsEnabled.value, onCheckedChange = {
                 if (ActivityCompat.checkSelfPermission(
                         context,
@@ -69,6 +80,17 @@ fun LocationApp(
                     }
                 })
             Text("Network")
+            Spacer(modifier = Modifier.weight(1f))
+            Button(modifier = Modifier.padding(horizontal = 15.dp),
+                onClick = { /*TODO*/ }) {
+                Text(text = "Share")
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = "${Build.MANUFACTURER} ${Build.MODEL}, Android ${Build.VERSION.RELEASE}")
         }
         Column(
             modifier = Modifier
