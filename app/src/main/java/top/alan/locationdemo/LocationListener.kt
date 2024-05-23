@@ -1,12 +1,13 @@
 package top.alan.locationdemo
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.location.GnssStatus
+import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -31,7 +32,6 @@ fun gpsLocationListener(
     var addressInfo by remember { mutableStateOf("") }
     var timeLabel by remember { mutableStateOf("") }
     var locationText by remember { mutableStateOf("") }
-    val launchTime = LocalTime.now()
 
     return remember {
         LocationListener { location ->
@@ -41,7 +41,7 @@ fun gpsLocationListener(
 
             timeLabel = getTime(launchTime)
             locationText = "Time: $timeLabel\n" +
-                    "Source: GPS\n" +
+                    "Source: ${if(isMock(location)) "Mocked " else ""}GPS\n" +
                     "Satellite Found: ${satelliteFound.value}\n" +
                     "Connected Satellites: ${satelliteCount.value}\n" +
                     "Latitude: ${location.latitude}\n" +
@@ -52,6 +52,10 @@ fun gpsLocationListener(
             onLocationChanged(locationText)
         }
     }
+}
+
+private fun isMock(location: Location): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) location.isMock else location.isFromMockProvider
 }
 
 @SuppressLint("MissingPermission")

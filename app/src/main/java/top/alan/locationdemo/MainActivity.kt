@@ -63,15 +63,16 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun RegisterListeners() {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val launchTime = LocalTime.now()
         viewModel.locationManager = locationManager
         viewModel.gpsLocationListener = gpsLocationListener(
-            launchTime = LocalTime.now(),
+            launchTime = launchTime,
             satelliteFound = viewModel.satelliteFound,
             satelliteCount = viewModel.satelliteCount,
             onLocationChanged = { it: String -> viewModel.onLocationChanged(it) })
         viewModel.networkLocationListener =
             networkLocationListener(
-                launchTime = LocalTime.now(),
+                launchTime = launchTime,
                 onLocationChanged = { it: String -> viewModel.onLocationChanged(it) })
         viewModel.gnssCallback = gnssCallback(
             locationManager = locationManager,
