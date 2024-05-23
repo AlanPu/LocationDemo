@@ -2,7 +2,6 @@ package top.alan.locationdemo
 
 import android.Manifest
 import android.content.Context
-import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -29,7 +28,6 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         viewModel.removeListeners()
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +58,6 @@ class MainActivity : ComponentActivity() {
                 RegisterListeners()
             }
         }
-
     }
 
     @Composable

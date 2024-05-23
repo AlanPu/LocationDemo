@@ -111,10 +111,10 @@ private fun getAddressInfo(
                     "City: ${address.locality}\n" +
                     "State: ${address.adminArea}\n" +
                     "Country: ${address.countryName}\n" +
-                    "Postal Code: ${address.postalCode}\n"
+                    "Postal Code: ${address.postalCode}\n\n"
         }
     } else {
-        addressInfo = "No address found for the location."
+        addressInfo = "No address found for the location.\n"
     }
     return addressInfo
 }
